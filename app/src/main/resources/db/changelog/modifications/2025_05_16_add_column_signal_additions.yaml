@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: 40
+      author: imran
+      changes:
+        - addColumn:
+            tableName: signal_additions
+            columns:
+              - column:
+                  name: current_atm
+                  type: INT

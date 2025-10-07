@@ -1,0 +1,220 @@
+syntax = "proto3";
+option java_multiple_files = true;
+import "google/protobuf/wrappers.proto";
+
+package com.market.proto.tr;
+
+
+
+// Define the PlaceOrderResponse message
+message OrderResponse {
+
+  string order_no = 1;
+  string status = 2;
+  string error_code = 3;
+  string message = 4;
+  string orderUniqueIdentifier = 5;
+  string oms_error_code = 6;
+  string iv = 7;
+
+}
+
+// Define the PlaceOrderRequest message
+message PlaceOrder {
+  string client_id = 1;
+  string user_id = 2;
+  string txn_type = 3;
+  string user_type = 4;
+  string exchange = 5;
+  string segment = 6;
+  string product = 7;
+  string security_id = 8;
+  int32 quantity = 9;
+  double price = 10;
+  string validity = 11;
+  string order_type = 12;
+  int32 disc_quantity = 13;
+  double trigger_price = 14;
+  string off_mkt_flag = 15;
+  string remarks = 16;
+  string mkt_type = 17;
+  string settlor = 18;
+  string group_id = 19;
+  string remark1 = 20;
+  string strategy_id = 21;
+  string remark2 = 22;
+  string order_unique_identifier = 23;
+  string client_ip_address = 24;
+  string user_agent = 25;
+}
+
+// Define the PlaceOrderRequest message, now with a list of orders
+message PlaceOrderRequest {
+  string signalID = 1;
+  string tenantID = 2;
+  string token = 3;
+  string iv = 4;
+  google.protobuf.BoolValue exitFlag = 5;
+  repeated PlaceOrder orders = 6;
+  int32 requiredCapital = 7;
+}
+
+// Define the PlaceOrderResponse message
+message PlaceOrderResponse {
+  string status = 1;
+  repeated OrderResponse response = 2;
+  string signalID = 3;
+  string tenantID = 4;
+  repeated string errors = 5;
+
+}
+
+// --- PlaceOrderService  ---
+
+service PlaceOrderService {
+  // Endpoint to place an order
+  rpc PlaceOrder(PlaceOrderRequest) returns (PlaceOrderResponse);
+}
+
+
+
+// ---  Streaming Service for Order Book Response ---
+
+message OrderStatusFeed {
+
+  string cBuyOrSell = 1;
+  string cProductId = 2;
+  string cSegment = 3;
+  string cSource = 4;
+  double fLtp = 5;
+  double fMultiplier = 6;
+  double fPrice = 7;
+  double fTickSize = 8;
+  int32 iLotsize = 9;
+  int32 iMsgLength = 10;
+  int32 iRequestCode = 11;
+  int32 iTotalQty = 12;
+  int32 iTotalQtyRem = 13;
+  string sAlgoID = 14;
+  string sChannel = 15;
+  string sClientId = 16;
+  string sCustomSym = 17;
+  string sExcgId = 18;
+  string sExchOrderNumber = 19;
+  string sExchOrderTime = 20;
+  string sExpiryDate = 21;
+  string sGtdDate = 22;
+  string sInstrument = 23;
+  string sIntrumentType = 24;
+  string sIsin = 25;
+  string sLastUpdatedTime = 26;
+  string sMktType = 27;
+  string sOptionType = 28;
+  string sOrdEntryTime = 29;
+  string sOrderNumber = 30;
+  string sOrderType = 31;
+  string sOrderValidity = 32;
+  string sPanID = 33;
+  string sPlatformID = 34;
+  string sProductName = 35;
+  string sReasonDesc = 36;
+  string sRemarks = 37;
+  string sSecurityId = 38;
+  string sSeries = 39;
+  string sSettlor = 40;
+  string sStatus = 41;
+  string sSymbol = 42;
+  string orderUniqueIdentifier = 43;
+  double fAvgTradePrice = 44;
+  double fStrikePrice = 45;
+  double fTradePrice = 46;
+  double iTotalTradedQty = 47;
+
+}
+
+// Define the OrderBookStreamRequest message for requesting order book data
+message OrderStatusFeedStreamRequest {
+  string type = 1;  // Type of data to filter (e.g., "order book updates")
+  string symbol = 2; // Symbol for the instrument (optional, if filtering is needed)
+}
+
+// Define the OrderBookStreamService service for streaming order book data
+service OrderStatusFeedStreamService {
+  // Server-streaming RPC to stream order book data to the client
+  rpc StreamOrderStatusFeed (OrderStatusFeedStreamRequest) returns (stream OrderStatusFeed);
+}
+
+
+
+
+// ---  Streaming Service for Position Response ---
+
+// Define the PositionResponseStream message
+
+message PositionResponse {
+  string symbol = 1;
+  string net_qty = 2;
+  string sell_avg = 3;
+  string buy_avg = 4;
+  string gross_val = 5;
+  string instrument = 6;
+  string realised_profit = 7;
+  string client_id = 8;
+  string tot_buy_val_cf = 9;
+  string tot_sell_qty = 10;
+  string last_traded_price = 11;
+  string tot_buy_qty_cf = 12;
+  string segment = 13;
+  string gross_qty = 14;
+  string lot_size = 15;
+  string security_id = 16;
+  string strike_price = 17;
+  string cost_price = 18;
+  string tot_sell_val = 19;
+  string product = 20;
+  string tot_sell_val_cf = 21;
+  string comm_multiplier = 22;
+  string net_avg = 23;
+  string expiry_date = 24;
+  string mtm = 25;
+  string rbi_reference_rate = 26;
+  string tot_sell_qty_cf = 27;
+  string tot_sell_val_day = 28;
+  string tot_buy_val = 29;
+  string net_val = 30;
+  string display_name = 31;
+  string exchange_inst_name = 32;
+  string cross_cur_flag = 33;
+  string tot_buy_val_day = 34;
+  string series = 35;
+  string tot_sell_qty_day = 36;
+  string opt_type = 37;
+  string exchange = 38;
+  string tot_buy_qty_day = 39;
+  string tot_buy_qty = 40;
+  string mkt_type = 41;
+  string isin = 42;
+}
+
+message PositionResponseStream {
+  repeated PositionResponse positions = 1;
+  string userId = 2;
+}
+
+// Define the PositionStreamRequest message for requesting position data from Service
+message PositionStreamRequest {
+  string type = 1;  // Type of data to filter (e.g., "position updates")
+}
+
+// Define the PositionService service for streaming position data
+service PositionService {
+  // Server-streaming RPC to stream position data to the client
+  rpc StreamPositionData (PositionStreamRequest) returns (stream PositionResponseStream);
+}
+
+
+
+
+
+
+

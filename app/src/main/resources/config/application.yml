@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: "quantSignal"
+  profiles:
+    active: dev

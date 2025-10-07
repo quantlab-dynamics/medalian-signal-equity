@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2025_09_30_add_column_ltp_pnl_position
+      author: uday
+      changes:
+        - addColumn:
+            tableName: position
+            columns:
+              - column:
+                  name: realised_profit
+                  type: BIGINT
+              - column:
+                  name: last_traded_price
+                  type: BIGINT

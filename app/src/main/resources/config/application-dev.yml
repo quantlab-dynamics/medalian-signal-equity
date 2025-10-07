@@ -1,0 +1,127 @@
+
+spring:
+  jackson:
+    time-zone: Asia/Kolkata
+  datasource:
+    url: jdbc:postgresql://localhost:5432/signal_dev
+    username: dev_admin
+    password: bps@1122
+    driver-class-name: "org.postgresql.Driver"
+    profiles:
+      active: dev
+    hikari:
+      maximum-pool-size: 20
+      max-lifetime: 1000000
+      connection-timeout: 30000
+      idle-timeout: 60000
+      minimum-idle: 10
+      data-source-properties:
+        serverTimezone: Asia/Kolkata
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: mohammedimran0266@gmail.com
+    password: "nuzd zxko pbur ggrs"
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: signal
+        format_sql: false
+        use_second_level_cache: false
+        use_sql_comments: false
+        connection:
+          autocommit: true
+          isolation: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: off
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    default-schema: signal
+  web:
+    resources:
+      static-locations:
+        - classpath:/META-INF/resources/
+        - classpath:/resources/
+        - classpath:/static/
+        - classpath:/public/
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 60000ms
+      jedis:
+        pool:
+          max-active: 20
+          min-idle: 10
+      password: ""
+
+server:
+  port: 8082
+  servlet:
+    context-path: /api
+
+logging:
+  file:
+    path: logs/signal-quantlogs
+  logback:
+    rollingpolicy:
+      file-name-pattern: logs/signal-quantlogs-%d{yyyy-MM-dd}.log
+      max-history: 365
+      total-size-cap: 100MB
+  level:
+    io:
+      grpc: error
+    root: error
+    org:
+      grpc: error
+      hibernate:
+        SQL : error
+        type :
+          descriptor :
+            sql:
+              BasicBinder: error
+      apache:
+        tomcat: error
+      springframework: info
+    com:
+      zaxxer:
+        hikari: info
+grpc:
+  client:
+    grpc-quantlab-service-xts:
+      address: static://localhost:9040
+      negotiation-type: plaintext
+    grpc-quantlab-service-tr:
+      address: static://localhost:9000
+      negotiation-type: plaintext
+
+xts:
+  location: "localhost"
+  port: 9040
+tr:
+  location: "localhost"
+  port: 9000
+
+email:
+  sender: engineering@teamquantlab.com
+  password: "Quant_lab1234"
+
+profile_url: https://publicsvc.heytorus.com/users/api/users/me
+validation_url: https://publicsvc.heytorus.com/users/api/users/me
+
+
+threads:
+  pool:
+    Pnl: 1
+
+

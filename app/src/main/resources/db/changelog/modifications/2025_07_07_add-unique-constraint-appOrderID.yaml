@@ -1,0 +1,29 @@
+databaseChangeLog:
+  - - changeSet:
+        id: 0002-remove-duplicate-appOrderID
+        author: uday
+        changes:
+          - sql:
+              splitStatements: true
+              stripComments: true
+              sql: |
+                DELETE FROM order
+                WHERE id IN (
+                  SELECT id FROM (
+                    SELECT id,
+                           ROW_NUMBER() OVER (PARTITION BY app_order_id ORDER BY id) AS rn
+                    FROM order
+                  ) tmp
+                  WHERE tmp.rn > 1
+                );
+
+  - changeSet:
+      id: add-unique-constraint-appOrderID
+      author: uday
+      changes:
+        - addUniqueConstraint:
+            tableName: order
+            columnNames: app_order_id
+            constraintName: uk_orders_app_order_id
+
+

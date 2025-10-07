@@ -1,0 +1,97 @@
+
+spring:
+  jackson:
+    time-zone: Asia/Kolkata
+  datasource:
+    url: jdbc:postgresql://signal_db:5432/signal_dev
+    username: dev_admin
+    password: bps@1122
+    driver-class-name: "org.postgresql.Driver"
+    profiles:
+      active: uatprod
+    hikari:
+      connection-timeout: 26000
+      idle-timeout: 30000
+      leak-detection-threshold: 300
+      maximum-pool-size: 50
+      minimum-idle: 5
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: signal
+        format_sql: false
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    default-schema: signal
+  data:
+    redis:
+      host: redis
+      port: 6379
+      timeout: 60000ms
+      jedis:
+        pool:
+          max-active: 20
+          min-idle: 10
+
+server:
+  port: 8082
+  servlet:
+    context-path: /ql
+  ssl:
+    enabled: true
+    key-store: /app/ssl/keystore.p12
+    key-store-type: PKCS12
+    key-store-password: ${SSL_KEY_PASSWORD}
+    key-alias: tomcat
+
+logging:
+  file:
+    name: logs/spring-logs.log
+  logback:
+      rollingpolicy:
+        file-name-pattern: logs/signal-quantlogs-%d{yyyy-MM-dd}.log
+        max-history: 365
+        total-size-cap: 100MB
+        max-file-size: 100MB
+  level:
+    com:
+      zaxxer:
+        hikari: warn
+    root: info
+    org:
+      hibernate:
+        sql: info
+        sql2o: info
+      springframework: info
+    sql: info
+
+grpc:
+  client:
+    grpc-quantlab-service-xts:
+      address: static://127.0.0.1:9040
+      negotiation-type: plaintext
+    grpc-quantlab-service-tr:
+      address: static://${TR_GRPC_HOST:127.0.0.1}:9000
+      negotiation-type: plaintext
+
+xts:
+  location: 127.0.0.1
+  port: 9040
+tr:
+  location: ${TR_GRPC_HOST:127.0.0.1}
+  port: 9000
+
+
+email:
+  sender: mohammedimran0266@gmail.com
+
+profile_url: https://cug-publicsvc.heytorus.com/users/api/users/me
+validation_url: https://cug-publicsvc.heytorus.com/users/api/users/me
+
+threads:
+  pool:
+    Pnl: 2

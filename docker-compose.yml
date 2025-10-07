@@ -1,0 +1,28 @@
+services:
+  app:
+    image: 976193231076.dkr.ecr.ap-south-1.amazonaws.com/ecr-signal-repo:latest
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    networks:
+      - app_network
+
+  db:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: dev_admin
+      POSTGRES_PASSWORD: bps@1122
+      POSTGRES_DB: signal_dev
+    ports:
+      - "5430:5432"
+    volumes:
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - app_network
+    restart: always
+
+
+networks:
+  app_network:
+    driver: bridge
