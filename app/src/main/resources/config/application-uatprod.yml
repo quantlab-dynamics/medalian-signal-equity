@@ -41,6 +41,7 @@ server:
   port: 8082
   servlet:
     context-path: /ql
+
 #  ssl:
 #    enabled: true
 #    key-store: /app/ssl/keystore.p12
