@@ -41,12 +41,12 @@ server:
   port: 8082
   servlet:
     context-path: /ql
-  ssl:
-    enabled: true
-    key-store: /app/ssl/keystore.p12
-    key-store-type: PKCS12
-    key-store-password: ${SSL_KEY_PASSWORD}
-    key-alias: tomcat
+#  ssl:
+#    enabled: true
+#    key-store: /app/ssl/keystore.p12
+#    key-store-type: PKCS12
+#    key-store-password: ${SSL_KEY_PASSWORD}
+#    key-alias: tomcat
 
 logging:
   file:
