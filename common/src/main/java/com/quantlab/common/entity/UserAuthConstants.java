@@ -100,4 +100,7 @@ import java.time.LocalDateTime;
 
      @Column(name = "branch_id")
      private String branchId;
+
+     @Column(name = "password")
+     private String password;
 }

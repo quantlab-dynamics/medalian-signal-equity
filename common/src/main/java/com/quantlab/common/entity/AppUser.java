@@ -60,6 +60,9 @@ public class AppUser extends AuditingEntity {
     @Column(name = "app_user_id", nullable = true)
     private Long appUserId;
 
+    @Column(name = "client_id")
+    private String clientId;
+
     // has to change
 //    @PrePersist
 //    private void setUserId() {
