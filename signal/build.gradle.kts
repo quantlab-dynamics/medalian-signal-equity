@@ -89,6 +89,9 @@ dependencies {
     implementation("org.json:json:20210307")
     implementation("org.springframework.boot:spring-boot-starter-aop")
 
+    // https://mvnrepository.com/artifact/org.ta4j/ta4j-core
+    implementation("org.ta4j:ta4j-core:0.17")
+
 }
 
 tasks.bootRun {
