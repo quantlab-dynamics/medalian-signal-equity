@@ -214,7 +214,7 @@ rows.addAll(this.initiateReport("PE" , start,end));
 
     @Override
     public void run(String... args) throws Exception {
-        getAlldata(15,20);
+       // getAlldata(15,20);
     }
 }
 
