@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 import static com.quantlab.signal.utils.staticdata.StaticStore.redisIndexStrikePrices;
 
 @Component
-public class GenerateExcelReport implements CommandLineRunner {
+public class GenerateExcelReport implements CommandLineRunner{
 
 
     @Autowired
@@ -61,18 +61,18 @@ public class GenerateExcelReport implements CommandLineRunner {
     @Autowired
     private TouchLineService touchLineService;
 
-    public void sendReport(List<CandleRow> rows, String toEmail , String coreMessage) throws Exception {
+    public void sendReport(List<CandleRow> rows, String toEmail , String coreMessage , int start , int end) throws Exception {
         byte[] excelBytes = this.generateExcel(rows);
 
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
         helper.setTo(toEmail);
-        helper.setSubject("Daily Report");
+        helper.setSubject("Daily Report - "+ LocalDateTime.now().toLocalDate() +" - "+ LocalDateTime.now().toLocalTime());
         helper.setText(coreMessage);
         helper.setText("Please find attached the latest report.");
 
-        helper.addAttachment("report.xlsx", new ByteArrayResource(excelBytes));
+        helper.addAttachment("daily-report-"+LocalDateTime.now().toLocalDate()+"-"+LocalDateTime.now().toLocalTime()+"-List.xlsx", new ByteArrayResource(excelBytes));
 
         mailSender.send(message);
     }
@@ -99,7 +99,7 @@ for (
 return candleRows;
     }
 
-    public static byte[] generateExcel(List<CandleRow> rows) throws Exception {
+    public static byte[] generateExcel(List<CandleRow> rows ) throws Exception {
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Report");
 
@@ -125,7 +125,7 @@ return candleRows;
         byte[] byteArray = out.toByteArray();
 
         // Save locally
-        try (FileOutputStream fos = new FileOutputStream("ticks_candles.xlsx")) {
+        try (FileOutputStream fos = new FileOutputStream("candles_"+LocalDateTime.now().toLocalDate()+"list.xlsx")) {
             fos.write(byteArray);
         }
 
@@ -133,7 +133,7 @@ return candleRows;
         return byteArray;
     }
 
-    public void initiateReport()  {
+    public List<CandleRow>  initiateReport(String sType , int start , int end)  {
 
         MarketData marketData = touchLineService.getTouchLine(String.valueOf(26000));
         Integer   atm = marketDataFetch.getATM("NIFTY", marketData.getLTP(), commonUtils.getExpiryShotDateByIndex(ExpiryType.CURRENT_WEEK.getKey(),"NIFTY",OptionType.OPTION.getKey()) );
@@ -141,16 +141,16 @@ return candleRows;
         List<Integer> strikeList = redisIndexStrikePrices.get("NIFTY"+"_"+commonUtils.getExpiryShotDateByIndex(ExpiryType.CURRENT_WEEK.getKey(), "NIFTY", OptionType.OPTION.getKey()));
 
        Map<String, List<MarketData>> callTouchLine=  Arrays.stream(StrikeTypeMenu.values()).map(dto->{
-            String strike = String.valueOf(diyStrategyCommonUtil.getStrike(dto.getKey(),"NIFTY","CE",atm,strikeList, ExpiryType.CURRENT_WEEK.getKey()));
+            String strike = String.valueOf(diyStrategyCommonUtil.getStrike(dto.getKey(),"NIFTY",sType,atm,strikeList, ExpiryType.CURRENT_WEEK.getKey()));
             String newKey = "NIFTY" +
                     commonUtils.getExpiryShotDateByIndex(ExpiryType.CURRENT_WEEK.getKey(), "NIFTY", OptionType.OPTION.getKey()) +
-                    "-" + strike +  "CE";
+                    "-" + strike +  sType;
 
 //            logger.info("keys generated: "+newKey);
             System.out.println("keys generated: "+newKey);
             MasterResponseFO master = marketDataFetch.getMasterResponse(newKey);
             List<MarketData> ticks = tickRepository.findAll(String.valueOf(master.getExchangeInstrumentID()));
-            ticks= filterTicksByTimeRange(ticks);
+            ticks= filterTicksByTimeRange(ticks , start , end);
                    Map<String, List<MarketData>> singleMap = new HashMap<>();
                    singleMap.put(master.getName(), ticks);
                    return singleMap;
@@ -167,25 +167,26 @@ return candleRows;
                ));
         System.out.println(callTouchLine);
         List<CandleRow> rows = this.getCandleRow(callTouchLine);
-try {
 
-    this.sendReport(rows,"bhargava2211@gmail.com","9:15 to 9:30 report");
-    this.sendReport(rows,"kp@gmail.com","9:15 to 9:30 report");
-} catch (Exception e) {
-    throw new RuntimeException(e);
-}
+        return rows;
     }
 
-    @Override
-    public void run(String... args) throws Exception {
-        this.initiateReport();
+    public void getAlldata(int start, int end){
+List<CandleRow> rows = this.initiateReport("CE"  , start,end);
+rows.addAll(this.initiateReport("PE" , start,end));
+        try {
+//            byte[] excelBytes = this.generateExcel(rows);
+            this.sendReport(rows,"bhargava2211@gmail.com","9:15 to 9:30 report"  , start,end );
+            this.sendReport(rows,"kpdasari@gmail.com","9:15 to 9:30 report" , start,end);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
+    public static List<MarketData> filterTicksByTimeRange(List<MarketData> ticks , int startTime , int endTime) {
 
-    public static List<MarketData> filterTicksByTimeRange(List<MarketData> ticks) {
-
-        LocalTime start = LocalTime.of(9, 15);
-        LocalTime end = LocalTime.of(12, 30);
+        LocalTime start = LocalTime.of(9, startTime);
+        LocalTime end = LocalTime.of(9, endTime);
 
         return ticks.stream()
                 .filter(t -> {
@@ -193,7 +194,7 @@ try {
                     LocalTime tickTime = LocalDateTime.ofEpochSecond(
                             t.getLut(),
                             0,
-                            ZoneOffset.UTC // do NOT apply IST again
+                            ZoneOffset.UTC
                     ).toLocalTime();
 
                     return !tickTime.isBefore(start) && tickTime.isBefore(end);
@@ -201,9 +202,19 @@ try {
                 .collect(Collectors.toList());
     }
 
-    @Scheduled(cron = "0 30 9 * * MON-FRI", zone = "Asia/Kolkata")
+    @Scheduled(cron = "0 20 9 * * MON-FRI", zone = "Asia/Kolkata")
     public void dailyReport() {
-        initiateReport();
+        getAlldata(15,20);
+    }
+
+    @Scheduled(cron = "0 25 9 * * MON-FRI", zone = "Asia/Kolkata")
+    public void dailyReport930() {
+        getAlldata(20,25);
+    }
+
+    @Override
+    public void run(String... args) throws Exception {
+        getAlldata(15,20);
     }
 }
 
